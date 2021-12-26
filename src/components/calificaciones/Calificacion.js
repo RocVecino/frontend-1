@@ -6,7 +6,6 @@ export default class Calificacion extends Component
     {
         return (
             <tr>
-                <td>{this.props.calificacion.Alumno}</td>
                 <td>{this.props.calificacion.Asignatura}</td>
                 <td>{this.props.calificacion.Nota}</td>
                 <td>
