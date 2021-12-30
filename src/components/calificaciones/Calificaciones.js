@@ -55,9 +55,21 @@ export default class Calificaciones extends Component {
 
     handleDelete(calificacion)
     {
-        this.setState(prevState => ({
-            calificaciones: prevState.calificaciones.filter((p) => p._id !== calificacion._id)
-        }));
+        CalificacionesApi.deleteNotas(calificacion).then((response)=>{
+            this.setState(prevState => ({
+                calificaciones : prevState.calificacion.filter((n) => n._id !== calificacion._id)
+            }));
+        },
+        //en caso de que haya error
+        (error) => {
+            console.log("error delete");
+            this.setState(prevState => {
+                return ({
+                    errorInfo: error.message
+                });
+            });
+        }
+        );
     }
 
     handleCloseError()
@@ -69,23 +81,32 @@ export default class Calificaciones extends Component {
 
     addCalificacion(calificacion)
     {
-        calificacion["_id"] = this.state.calificaciones.length + 1;
+        CalificacionesApi.addNotas(calificacion).then(
+            (response) => {
 
-        this.setState(prevState => {
+                this.setState(prevState => {
+                    const calificaciones = prevState.calificaciones;
 
-            const calificaciones = prevState.calificaciones;
-
-            if(!calificaciones.find(p => p.identificacion === calificacion.identificacion))
-            {
-                return ({
-                    calificaciones: [...prevState.calificaciones, calificacion]
+                    calificacion["_id"] = prevState.calificaciones.length + 1;
+        
+                    if(!calificaciones.find(p => p.Alumno === calificacion.Alumno && p.Asignatura === calificacion.Asignatura && p.Nota === calificacion.Nota))
+                    {         
+                        return ({
+                            calificaciones: [...prevState.calificaciones, calificacion]
+                        });
+                    }
+                });
+                
+            },
+            (error) => {
+                
+                this.setState(prevState => {
+                    return ({
+                        errorInfo: error.message
+                    });
                 });
             }
-
-            return ({
-                errorInfo: "La calificacion ya existe en el sistema."
-            });
-        });
+        );
     }
 
     handleEditCancel(calificacion)
@@ -108,19 +129,32 @@ export default class Calificaciones extends Component {
 
     handleEditSave(calificacion)
     {
-        this.setState(prevState => {
+        CalificacionesApi.updateNotas(calificacion).then((response) => {
 
-            const isEditing = Object.assign({}, prevState.isEditing);
-            delete isEditing[calificacion._id];
+                this.setState(prevState => {
 
-            const calificaciones = prevState.calificaciones;
-            const pos = calificaciones.findIndex(p  => p._id ===  calificacion._id);
+                    const isEditing = Object.assign({}, prevState.isEditing);
+                    delete isEditing[calificacion._id];
+        
+                    const calificaciones = prevState.calificaciones;
+                    const pos = calificaciones.findIndex(p  => p._id ===  calificacion._id);
+        
+                    return {
+                        calificaciones: [...calificaciones.slice(0, pos), Object.assign({}, calificacion), ...calificaciones.slice(pos + 1)],
+                        isEditing: isEditing
+                    };
+                });
 
-            return {
-                calificaciones: [...calificaciones.slice(0, pos), Object.assign({}, calificacion), ...calificaciones.slice(pos + 1)],
-                isEditing: isEditing
-            };
-        });
+            },
+            (error) => {
+                console.log("error update");
+                this.setState(prevState => {
+                    return ({
+                        errorInfo: error.message
+                    });
+                });
+            }
+        );
     }
 
     render()
