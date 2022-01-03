@@ -68,7 +68,7 @@ export default class ProfesoresApi
             body: JSON.stringify(profesor)
         });
 
-        const response = await fetch(request);
+        const response = await fetch(request); 
 
         console.log(response);
         console.log(response.ok);
